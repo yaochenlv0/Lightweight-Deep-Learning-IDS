@@ -1,0 +1,9 @@
+data/
+run_logs/
+__pycache__/
+*.pyc
+.idea/
+.vscode/
+.venv/
+security_events.db
+*.log
