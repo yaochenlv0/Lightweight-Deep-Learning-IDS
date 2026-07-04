@@ -87,6 +87,12 @@ Supported scenario names:
 - `dos`
 - `mixed_attack`
 
+For detailed Kali/Ubuntu demo commands, see:
+
+```text
+docs/vm-demo-commands.md
+```
+
 ## Model Files
 
 The repository includes the trained model files needed for direct demo running:
