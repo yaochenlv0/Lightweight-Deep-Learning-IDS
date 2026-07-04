@@ -1,9 +1,47 @@
-data/
-run_logs/
+# Python caches and virtual environments
 __pycache__/
-*.pyc
+*.py[cod]
+.venv/
+venv/
+env/
+
+# IDE settings
 .idea/
 .vscode/
-.venv/
-security_events.db
+
+# Runtime logs and generated databases
 *.log
+run_logs/
+security_events.db
+data/ids_system.db
+data/vm_live_traffic.csv
+data/vm_bridge/current_scenario.json
+
+# Keep only lightweight demo scenario CSV files in data/
+data/*
+!data/demo_scenarios/
+!data/demo_scenarios/*.csv
+!data/vm_bridge/
+!data/vm_bridge/.gitkeep
+
+# Raw datasets are too large for this repository
+data/cicids/
+data/kitsune/
+
+# Generated outputs and local thesis artifacts
+outputs/
+docx_media/
+new_media/
+thesis_figures/
+thesis_figures_complex/
+thesis_figures_no_titles/
+scripts/
+results/figures/
+*.docx
+*.pptx
+*.pdf
+*.jpg
+*.jpeg
+
+# Matplotlib cache
+.matplotlib_cache/

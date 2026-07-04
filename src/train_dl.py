@@ -1,11 +1,13 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import os
 import time
 from torch.utils.data import TensorDataset, DataLoader
 import numpy as np
 
 from config import MLP_MODEL_PATH, RESULT_DIR, MLP_HIDDEN_LAYERS, MLP_EPOCHS, MLP_LR, BATCH_SIZE
+from src.database import insert_model_metrics
 from src.evaluate import calculate_metrics, plot_confusion_matrix, save_metrics
 from src.visualization import plot_training_loss, plot_prediction_probability
 
@@ -39,7 +41,10 @@ def train_dl_model(X_train_scaled, y_train):
     input_dim = X_train_scaled.shape[1]
     model = LightweightMLP(input_dim=input_dim, hidden_layers=MLP_HIDDEN_LAYERS)
 
-    criterion = nn.BCEWithLogitsLoss()
+    positive_count = float((y_train == 1).sum())
+    negative_count = float((y_train == 0).sum())
+    pos_weight = torch.tensor([negative_count / positive_count], dtype=torch.float32) if positive_count > 0 else torch.tensor([1.0])
+    criterion = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     optimizer = optim.Adam(model.parameters(), lr=MLP_LR)
 
     loss_history = []
@@ -92,6 +97,18 @@ def run_dl(X_train_scaled, X_test_scaled, y_train, y_test):
     torch.save(model.state_dict(), MLP_MODEL_PATH)
 
     save_metrics(metrics, f"{RESULT_DIR}/dl_metrics.csv")
+    try:
+        insert_model_metrics(
+            {
+                **metrics,
+                "model_name": "Lightweight MLP",
+                "model_type": "Deep Learning",
+                "model_path": MLP_MODEL_PATH,
+                "model_file_size": os.path.getsize(MLP_MODEL_PATH) / 1024 / 1024,
+            }
+        )
+    except Exception as exc:
+        print(f"[DB] Lightweight MLP 指标写入失败：{exc}")
     plot_confusion_matrix(
         y_test,
         y_pred,

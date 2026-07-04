@@ -1,8 +1,10 @@
 import joblib
+import os
 import time
 from sklearn.ensemble import RandomForestClassifier
 
 from config import RF_MODEL_PATH, RESULT_DIR
+from src.database import insert_model_metrics
 from src.evaluate import calculate_metrics, plot_confusion_matrix, save_metrics
 
 
@@ -12,6 +14,7 @@ def train_baseline_model(X_train, y_train):
         n_estimators=100,
         max_depth=None,
         min_samples_split=2,
+        class_weight="balanced",
         random_state=42
     )
     model.fit(X_train, y_train)
@@ -34,6 +37,18 @@ def run_baseline(X_train, X_test, y_train, y_test):
     joblib.dump(model, RF_MODEL_PATH)
 
     save_metrics(metrics, f"{RESULT_DIR}/baseline_metrics.csv")
+    try:
+        insert_model_metrics(
+            {
+                **metrics,
+                "model_name": "RandomForest",
+                "model_type": "Machine Learning",
+                "model_path": RF_MODEL_PATH,
+                "model_file_size": os.path.getsize(RF_MODEL_PATH) / 1024 / 1024,
+            }
+        )
+    except Exception as exc:
+        print(f"[DB] RandomForest 指标写入失败：{exc}")
     plot_confusion_matrix(
         y_test,
         y_pred,
